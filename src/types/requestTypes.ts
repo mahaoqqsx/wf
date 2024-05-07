@@ -64,3 +64,9 @@ export interface IUpdateGlyphRequest {
     AvatarImageType: string;
     AvatarImage: string;
 }
+
+export interface IUnlockShipFeatureRequest {
+    Feature: string;
+    KeyChain: string;
+    ChainStage: number;
+}

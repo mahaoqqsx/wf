@@ -40,6 +40,9 @@ import { claimCompletedRecipeController } from "@/src/controllers/api/claimCompl
 import { shipDecorationsController } from "@/src/controllers/api/shipDecorationsController";
 import { setShipCustomizationsController } from "@/src/controllers/api/setShipCustomizationsController";
 import { setActiveShipController } from "@/src/controllers/api/setActiveShipController";
+import { updateQuestcontroller } from "@/src/controllers/api/updateQuestController";
+import { giveKeyChainTriggeredItemsController } from "@/src/controllers/api/giveKeyChainTriggeredItemsController";
+import { unlockShipFeatureController } from "@/src/controllers/api/unlockShipFeatureController";
 import { updateThemeController } from "../controllers/api/updateThemeController";
 import { getGuildController } from "@/src/controllers/api/getGuildController";
 import { addFriendImageController } from "@/src/controllers/api/addFriendImageController";
@@ -74,6 +77,9 @@ apiRouter.get("/getGuild.php", getGuildController);
 
 // post
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
+apiRouter.post("/unlockShipFeature.php", unlockShipFeatureController);
+apiRouter.post("/giveKeyChainTriggeredItems.php", giveKeyChainTriggeredItemsController);
+apiRouter.post("/updateQuest.php", updateQuestcontroller);
 apiRouter.post("/shipDecorations.php", shipDecorationsController);
 apiRouter.post("/setShipCustomizations.php", setShipCustomizationsController);
 apiRouter.post("/claimCompletedRecipe.php", claimCompletedRecipeController);
