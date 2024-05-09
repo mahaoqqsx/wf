@@ -47,6 +47,9 @@ import { updateThemeController } from "../controllers/api/updateThemeController"
 import { getGuildController } from "@/src/controllers/api/getGuildController";
 import { addFriendImageController } from "@/src/controllers/api/addFriendImageController";
 import { createGuildController } from "@/src/controllers/api/createGuildController";
+import { sellController } from "@/src/controllers/api/sellController";
+import { upgradesController } from "@/src/controllers/api/upgradesController";
+import { setSupportedSyndicateController } from "@/src/controllers/api/setSupportedSyndicateController";
 
 const apiRouter = express.Router();
 
@@ -74,6 +77,7 @@ apiRouter.get("/logout.php", logoutController);
 apiRouter.get("/setBootLocation.php", setBootLocationController);
 apiRouter.get("/setActiveShip.php", setActiveShipController);
 apiRouter.get("/getGuild.php", getGuildController);
+apiRouter.get("/setSupportedSyndicate.php", setSupportedSyndicateController);
 
 // post
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -104,5 +108,7 @@ apiRouter.post("/trainingResult.php", trainingResultController);
 apiRouter.post("/updateTheme.php", updateThemeController);
 apiRouter.post("/addFriendImage.php", addFriendImageController);
 apiRouter.post("/createGuild.php", createGuildController);
+apiRouter.post("/sell.php", sellController);
+apiRouter.post("/upgrades.php", upgradesController);
 
 export { apiRouter };

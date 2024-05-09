@@ -11,7 +11,6 @@ import {
 } from "@/src/types/inventoryTypes/commonInventoryTypes";
 import { ISuitDatabase } from "@/src/types/inventoryTypes/SuitTypes";
 import { IOperatorLoadOutSigcol, IWeaponDatabase } from "@/src/types/inventoryTypes/weaponTypes";
-import { Colour } from "warframe-items";
 
 //Document extends will be deleted soon. TODO: delete and migrate uses to ...
 export interface IInventoryDatabaseDocument extends IInventoryDatabase, Document {}
@@ -92,8 +91,18 @@ export interface IGenericItem {
     Configs: IItemConfig[];
     UpgradeVer: number;
     ItemId: IOid;
-    Features?: number; //space suit has this
+    Features?: number;
+    Polarity?: IPolarity[];
+    Polarized?: number;
+    ModSlotPurchases?: number;
+    CustomizationSlotPurchases?: number;
 }
+
+export interface IGenericItemDatabase extends Omit<IGenericItem, "ItemId"> {
+    _id: Types.ObjectId;
+}
+
+export type TGenericItemKey = "Suits" | "LongGuns" | "Pistols" | "Melee";
 
 export interface IDuviriInfo {
     Seed: number;
@@ -186,6 +195,7 @@ export interface IInventoryResponse {
     Boosters: IBooster[];
     ActiveDojoColorResearch: string;
     SentientSpawnChanceBoosters: ISentientSpawnChanceBoosters;
+    SupportedSyndicate?: string;
     Affiliations: IAffiliation[];
     QualifyingInvasions: any[];
     FactionScores: number[];

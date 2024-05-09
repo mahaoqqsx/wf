@@ -1,3 +1,5 @@
+import { IOid } from "./commonTypes";
+import { FocusSchool } from "@/src/types/inventoryTypes/commonInventoryTypes";
 import {
     IBooster,
     IChallengeProgress,
@@ -69,4 +71,20 @@ export interface IUnlockShipFeatureRequest {
     Feature: string;
     KeyChain: string;
     ChainStage: number;
+}
+
+export interface IUpgradesRequest {
+    ItemCategory: string;
+    ItemId: IOid;
+    ItemFeatures: number;
+    UpgradeVersion: number;
+    Operations: IUpgradeOperation[];
+}
+
+export interface IUpgradeOperation {
+    OperationType: string;
+    UpgradeRequirement: string; // uniqueName of item being consumed
+    PolarizeSlot: number;
+    PolarizeValue: FocusSchool;
+    PolarityRemap: {}[];
 }

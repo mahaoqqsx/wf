@@ -3,14 +3,19 @@ import { getWeaponType } from "@/src/services/itemDataService";
 import { getSubstringFromKeyword } from "@/src/helpers/stringHelpers";
 import {
     addBooster,
+    addConsumables,
     addCustomization,
     addMechSuit,
+    addMiscItems,
     addPowerSuit,
+    addRecipes,
     addSentinel,
     addWeapon,
+    getInventory,
     updateCurrency,
     updateSlots
 } from "@/src/services/inventoryService";
+import { IConsumable, IMiscItem, ITypeCount } from "@/src/types/inventoryTypes/inventoryTypes";
 import { IPurchaseRequest, IPurchaseResponse, SlotNameToInventoryName, SlotPurchase } from "@/src/types/purchaseTypes";
 import { logger } from "@/src/utils/logger";
 
@@ -44,10 +49,17 @@ export const handlePurchase = async (purchaseRequest: IPurchaseRequest, accountI
             inventoryChanges = await handleWeaponsPurchase(internalName, accountId);
             break;
         case "Types":
-            inventoryChanges = await handleTypesPurchase(internalName, accountId);
+            inventoryChanges = await handleTypesPurchase(
+                internalName,
+                accountId,
+                purchaseRequest.PurchaseParams.Quantity
+            );
             break;
         case "Boosters":
             inventoryChanges = await handleBoostersPurchase(internalName, accountId);
+            break;
+        case "Interface":
+            inventoryChanges = await handleCustomizationPurchase(internalName, accountId);
             break;
         default:
             const errorMessage = `unknown store category: ${storeCategory} not implemented or new`;
@@ -163,18 +175,25 @@ const handlePowersuitPurchase = async (powersuitName: string, accountId: string)
 };
 
 //TODO: change to getInventory, apply changes then save at the end
-const handleTypesPurchase = async (typesName: string, accountId: string) => {
+const handleTypesPurchase = async (typesName: string, accountId: string, quantity: number) => {
     const typeCategory = getStoreItemTypesCategory(typesName);
     logger.debug(`type category ${typeCategory}`);
     switch (typeCategory) {
+        case "AvatarImages":
         case "SuitCustomizations":
-            return await handleSuitCustomizationsPurchase(typesName, accountId);
-        // case "Recipes":
-        //     break;
+            return await handleCustomizationPurchase(typesName, accountId);
         case "Sentinels":
             return await handleSentinelPurchase(typesName, accountId);
         case "SlotItems":
             return await handleSlotPurchase(typesName, accountId);
+        case "Items":
+            return await handleMiscItemPurchase(typesName, accountId, quantity);
+        case "Recipes":
+        case "Consumables": // Blueprints for Ciphers, Antitoxins
+            return await handleRecipesPurchase(typesName, accountId, quantity);
+        case "Restoratives": // Codex Scanner, Remote Observer, Starburst
+            return await handleRestorativesPurchase(typesName, accountId, quantity);
+            break;
         default:
             throw new Error(`unknown Types category: ${typeCategory} not implemented or new`);
     }
@@ -193,7 +212,7 @@ const handleSentinelPurchase = async (sentinelName: string, accountId: string) =
     };
 };
 
-const handleSuitCustomizationsPurchase = async (customizationName: string, accountId: string) => {
+const handleCustomizationPurchase = async (customizationName: string, accountId: string) => {
     const customization = await addCustomization(customizationName, accountId);
 
     return {
@@ -225,6 +244,57 @@ const handleBoostersPurchase = async (boosterStoreName: string, accountId: strin
     return {
         InventoryChanges: {
             Boosters: [{ ItemType, ExpiryDate }]
+        }
+    };
+};
+
+const handleMiscItemPurchase = async (uniqueName: string, accountId: string, quantity: number) => {
+    const inventory = await getInventory(accountId);
+    const miscItemChanges = [
+        {
+            ItemType: uniqueName,
+            ItemCount: quantity
+        } satisfies IMiscItem
+    ];
+    addMiscItems(inventory, miscItemChanges);
+    await inventory.save();
+    return {
+        InventoryChanges: {
+            MiscItems: miscItemChanges
+        }
+    };
+};
+
+const handleRecipesPurchase = async (uniqueName: string, accountId: string, quantity: number) => {
+    const inventory = await getInventory(accountId);
+    const recipeChanges = [
+        {
+            ItemType: uniqueName,
+            ItemCount: quantity
+        } satisfies ITypeCount
+    ];
+    addRecipes(inventory, recipeChanges);
+    await inventory.save();
+    return {
+        InventoryChanges: {
+            Recipes: recipeChanges
+        }
+    };
+};
+
+const handleRestorativesPurchase = async (uniqueName: string, accountId: string, quantity: number) => {
+    const inventory = await getInventory(accountId);
+    const consumablesChanges = [
+        {
+            ItemType: uniqueName,
+            ItemCount: quantity
+        } satisfies IConsumable
+    ];
+    addConsumables(inventory, consumablesChanges);
+    await inventory.save();
+    return {
+        InventoryChanges: {
+            Consumables: consumablesChanges
         }
     };
 };

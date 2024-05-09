@@ -38,7 +38,7 @@ import {
     IPeriodicMissionCompletionResponse,
     ILoreFragmentScan
 } from "../../types/inventoryTypes/inventoryTypes";
-import { IMongoDate, IOid } from "../../types/commonTypes";
+import { IOid } from "../../types/commonTypes";
 import { ISuitDatabase } from "@/src/types/inventoryTypes/SuitTypes";
 import { IWeaponDatabase } from "@/src/types/inventoryTypes/weaponTypes";
 import {
@@ -193,6 +193,7 @@ const WeaponSchema = new Schema<IWeaponDatabase>(
         Polarity: [polaritySchema],
         FocusLens: String,
         ModSlotPurchases: Number,
+        CustomizationSlotPurchases: Number,
         UpgradeType: Schema.Types.Mixed, //todo
         UpgradeFingerprint: String,
         ItemName: String,
@@ -275,6 +276,7 @@ const suitSchema = new Schema<ISuitDatabase>(
         Polarity: [polaritySchema],
         Polarized: Number,
         ModSlotPurchases: Number,
+        CustomizationSlotPurchases: Number,
         FocusLens: String,
         UnlockLevel: Number
     },
@@ -648,6 +650,8 @@ const inventorySchema = new Schema<IInventoryDatabase, InventoryDocumentProps>(
         //Curent trade info Giving or Getting items
         PendingTrades: [Schema.Types.Mixed],
 
+        //Syndicate currently being pledged to.
+        SupportedSyndicate: String,
         //Curent Syndicates rank\exp
         Affiliations: [affiliationsSchema],
         //Syndicates Missions complate(Navigation->Syndicate)

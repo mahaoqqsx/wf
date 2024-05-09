@@ -12,7 +12,8 @@ import {
     IInventoryDatabaseDocument,
     IMiscItem,
     IMission,
-    IRawUpgrade
+    IRawUpgrade,
+    ITypeCount
 } from "@/src/types/inventoryTypes/inventoryTypes";
 import { IGenericUpdate } from "../types/genericUpdate";
 import { IArtifactsRequest, IMissionInventoryUpdateRequest, IThemeUpdateRequest } from "../types/requestTypes";
@@ -93,15 +94,19 @@ export const updateSlots = async (accountId: string, slotName: SlotNames, slotAm
 };
 
 export const updateCurrency = async (price: number, usePremium: boolean, accountId: string) => {
+    if (config.infiniteResources) {
+        return {};
+    }
+
     const inventory = await getInventory(accountId);
 
     if (usePremium) {
         if (inventory.PremiumCreditsFree > 0) {
-            inventory.PremiumCreditsFree += price;
+            inventory.PremiumCreditsFree -= Math.min(price, inventory.PremiumCreditsFree);
         }
-        inventory.PremiumCredits += price;
+        inventory.PremiumCredits -= price;
     } else {
-        inventory.RegularCredits += price;
+        inventory.RegularCredits -= price;
     }
 
     const modifiedPaths = inventory.modifiedPaths();
@@ -178,7 +183,7 @@ export const addWeapon = async (
             weaponIndex = inventory.Melee.push({ ItemType: weaponName, Configs: [], XP: 0 });
             break;
         default:
-            throw new Error("unknown weapon type");
+            throw new Error("unknown weapon type: " + weaponType);
     }
 
     const changedInventory = await inventory.save();
@@ -201,17 +206,32 @@ const addGearExpByCategory = (
     const category = inventory[categoryName];
 
     gearArray?.forEach(({ ItemId, XP }) => {
-        const itemIndex = ItemId ? category.findIndex(item => item._id?.equals(ItemId.$oid)) : -1;
-        const item = category[itemIndex];
+        if (!XP) {
+            return;
+        }
 
-        if (itemIndex !== -1 && item.XP != undefined) {
-            item.XP += XP || 0;
+        const itemIndex = ItemId ? category.findIndex(item => item._id?.equals(ItemId.$oid)) : -1;
+        if (itemIndex !== -1) {
+            const item = category[itemIndex];
+            item.XP ??= 0;
+            item.XP += XP;
             inventory.markModified(`${categoryName}.${itemIndex}.XP`);
+
+            const xpinfoIndex = inventory.XPInfo.findIndex(x => x.ItemType == item.ItemType);
+            if (xpinfoIndex !== -1) {
+                const xpinfo = inventory.XPInfo[xpinfoIndex];
+                xpinfo.XP += XP;
+            } else {
+                inventory.XPInfo.push({
+                    ItemType: item.ItemType,
+                    XP: XP
+                });
+            }
         }
     });
 };
 
-const addMiscItems = (inventory: IInventoryDatabaseDocument, itemsArray: IMiscItem[] | undefined) => {
+export const addMiscItems = (inventory: IInventoryDatabaseDocument, itemsArray: IMiscItem[] | undefined) => {
     const { MiscItems } = inventory;
 
     itemsArray?.forEach(({ ItemCount, ItemType }) => {
@@ -226,7 +246,7 @@ const addMiscItems = (inventory: IInventoryDatabaseDocument, itemsArray: IMiscIt
     });
 };
 
-const addConsumables = (inventory: IInventoryDatabaseDocument, itemsArray: IConsumable[] | undefined) => {
+export const addConsumables = (inventory: IInventoryDatabaseDocument, itemsArray: IConsumable[] | undefined) => {
     const { Consumables } = inventory;
 
     itemsArray?.forEach(({ ItemCount, ItemType }) => {
@@ -241,7 +261,7 @@ const addConsumables = (inventory: IInventoryDatabaseDocument, itemsArray: ICons
     });
 };
 
-const addRecipes = (inventory: IInventoryDatabaseDocument, itemsArray: IConsumable[] | undefined) => {
+export const addRecipes = (inventory: IInventoryDatabaseDocument, itemsArray: ITypeCount[] | undefined) => {
     const { Recipes } = inventory;
 
     itemsArray?.forEach(({ ItemCount, ItemType }) => {
@@ -319,7 +339,9 @@ export const missionInventoryUpdate = async (data: IMissionInventoryUpdateReques
     addConsumables(inventory, Consumables);
     addRecipes(inventory, Recipes);
     addChallenges(inventory, ChallengeProgress);
-    addMissionComplete(inventory, Missions!);
+    if (Missions) {
+        addMissionComplete(inventory, Missions);
+    }
 
     const changedInventory = await inventory.save();
     return changedInventory.toJSON();
