@@ -19,7 +19,7 @@
     "warframe-items": "^1.1261.19",
     "warframe-public-export-plus": "^0.1.0",
     "warframe-riven-info": "^0.1.0",
-    "winston": "^3.11.0",
+    "winston": "^3.13.0",
     "winston-daily-rotate-file": "^4.7.1"
   },
   "devDependencies": {
