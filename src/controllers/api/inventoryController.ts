@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import { getAccountIdForRequest } from "@/src/services/loginService";
-import { toInventoryResponse } from "@/src/helpers/inventoryHelpers";
 import { Inventory } from "@/src/models/inventoryModels/inventoryModel";
 import { Request, RequestHandler, Response } from "express";
 import { config } from "@/src/services/configService";
@@ -36,7 +35,8 @@ const inventoryController: RequestHandler = async (request: Request, response: R
     const inventoryJSON = inventory.toJSON();
     console.log(inventoryJSON.Ships);
 
-    const inventoryResponse = toInventoryResponse(inventoryJSON);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { accountOwnerId, ...inventoryResponse } = inventoryJSON;
 
     if (config.infiniteResources) {
         inventoryResponse.RegularCredits = 999999999;
