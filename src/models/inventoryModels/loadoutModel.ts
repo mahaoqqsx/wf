@@ -14,10 +14,7 @@ const oidSchema = new Schema<IOid>(
 //create a mongoose schema based on interface M
 const EquipmentSelectionSchema = new Schema<IEquipmentSelection>(
     {
-        ItemId: {
-            type: oidSchema,
-            default: { $oid: "000000000000000000000000" }
-        },
+        ItemId: oidSchema,
         mod: Number,
         cus: Number,
         hide: Boolean
@@ -92,6 +89,7 @@ type loadoutDocumentProps = {
     DRIFTER: Types.DocumentArray<ILoadoutConfigDatabase>;
 };
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 type loadoutModelType = Model<ILoadoutDatabase, {}, loadoutDocumentProps>;
 
 export const Loadout = model<ILoadoutDatabase, loadoutModelType>("Loadout", loadoutSchema);

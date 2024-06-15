@@ -1,5 +1,5 @@
 import { IOid } from "./commonTypes";
-import { FocusSchool } from "@/src/types/inventoryTypes/commonInventoryTypes";
+import { IPolarity, FocusSchool } from "@/src/types/inventoryTypes/commonInventoryTypes";
 import {
     IBooster,
     IChallengeProgress,
@@ -7,7 +7,9 @@ import {
     ICrewShipSalvagedWeaponSkin,
     IMiscItem,
     IMission,
-    IRawUpgrade
+    IRawUpgrade,
+    ISeasonChallengeCompletions,
+    ISeasonChallengeHistory
 } from "./inventoryTypes/inventoryTypes";
 import { IWeaponClient } from "./inventoryTypes/weaponTypes";
 import { ISuitClient } from "./inventoryTypes/SuitTypes";
@@ -25,9 +27,22 @@ export interface IThemeUpdateRequest {
     Sounds?: string;
 }
 
+export interface IAffiliationChange {
+    Tag: string;
+    Standing: number;
+    Title: number;
+}
+
+export interface IUpdateChallengeProgressRequest {
+    ChallengeProgress: IChallengeProgress[];
+    SeasonChallengeHistory: ISeasonChallengeHistory[];
+    SeasonChallengeCompletions: ISeasonChallengeCompletions[];
+}
+
 export interface IMissionInventoryUpdateRequest {
     rewardsMultiplier?: number;
     ActiveBoosters?: IBooster[];
+    AffiliationChanges?: IAffiliationChange[];
     LongGuns?: IWeaponClient[];
     Pistols?: IWeaponClient[];
     Suits?: ISuitClient[];
@@ -86,5 +101,5 @@ export interface IUpgradeOperation {
     UpgradeRequirement: string; // uniqueName of item being consumed
     PolarizeSlot: number;
     PolarizeValue: FocusSchool;
-    PolarityRemap: {}[];
+    PolarityRemap: IPolarity[];
 }

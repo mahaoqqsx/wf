@@ -232,7 +232,7 @@ export interface IInventoryResponse {
     AlignmentReplay: IAlignment;
     PersonalGoalProgress: IPersonalGoalProgress[];
     DailyAffiliationSolaris: number;
-    SpecialItems: IGenericItem2[];
+    SpecialItems: IGenericItem[];
     ThemeStyle: string;
     ThemeBackground: string;
     ThemeSounds: string;
@@ -420,6 +420,14 @@ export interface ICrewShipHarnessConfig {
     Upgrades?: string[];
 }
 
+export enum InventorySlot {
+    SUITS = "SuitBin",
+    WEAPONS = "WeaponBin",
+    MECHSUITS = "MechBin",
+    PVE_LOADOUTS = "PveBonusLoadoutBin",
+    SENTINELS = "SentinelBin"
+}
+
 export interface ISlots {
     Extra: number; // can be undefined, but not if used via mongoose
     Slots: number;
@@ -553,6 +561,8 @@ export interface IFocusXP {
     AP_ATTACK: number;
     AP_WARD: number;
 }
+
+export type TFocusPolarity = keyof IFocusXP;
 
 export interface IFusionTreasure {
     ItemCount: number;
@@ -1023,6 +1033,11 @@ export interface IRawUpgrade {
 }
 
 export interface ISeasonChallengeHistory {
+    challenge: string;
+    id: string;
+}
+
+export interface ISeasonChallengeCompletions {
     challenge: string;
     id: string;
 }

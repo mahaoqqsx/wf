@@ -1,20 +1,23 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
+import { getAccountIdForRequest } from "@/src/services/loginService";
 import { toInventoryResponse } from "@/src/helpers/inventoryHelpers";
 import { Inventory } from "@/src/models/inventoryModels/inventoryModel";
 import { Request, RequestHandler, Response } from "express";
-import config from "@/config.json";
+import { config } from "@/src/services/configService";
 import allMissions from "@/static/fixed_responses/allMissions.json";
 import allQuestKeys from "@/static/fixed_responses/allQuestKeys.json";
 import allShipDecorations from "@/static/fixed_responses/allShipDecorations.json";
 import allFlavourItems from "@/static/fixed_responses/allFlavourItems.json";
+import allSkins from "@/static/fixed_responses/allSkins.json";
 import { ILoadoutDatabase } from "@/src/types/saveLoadoutTypes";
 import { IShipInventory, IFlavourItem } from "@/src/types/inventoryTypes/inventoryTypes";
 
 const inventoryController: RequestHandler = async (request: Request, response: Response) => {
-    const accountId = request.query.accountId;
-
-    if (!accountId) {
-        response.status(400).json({ error: "accountId was not provided" });
+    let accountId;
+    try {
+        accountId = await getAccountIdForRequest(request);
+    } catch (e) {
+        response.status(400).send("Log-in expired");
         return;
     }
 
@@ -47,11 +50,58 @@ const inventoryController: RequestHandler = async (request: Request, response: R
         inventoryResponse.NodeIntrosCompleted.push("TeshinHardModeUnlocked");
     }
 
-    if (config.unlockAllQuests) inventoryResponse.QuestKeys = allQuestKeys;
+    if (config.unlockAllQuests) {
+        for (const questKey of allQuestKeys) {
+            if (!inventoryResponse.QuestKeys.find(quest => quest.ItemType == questKey)) {
+                inventoryResponse.QuestKeys.push({ ItemType: questKey });
+            }
+        }
+    }
+    if (config.completeAllQuests) {
+        for (const quest of inventoryResponse.QuestKeys) {
+            quest.Completed = true;
+        }
+    }
+
     if (config.unlockAllShipDecorations) inventoryResponse.ShipDecorations = allShipDecorations;
     if (config.unlockAllFlavourItems) inventoryResponse.FlavourItems = allFlavourItems satisfies IFlavourItem[];
 
+    if (config.unlockAllSkins) {
+        inventoryResponse.WeaponSkins = [];
+        for (const skin of allSkins) {
+            inventoryResponse.WeaponSkins.push({
+                ItemId: {
+                    $oid: "000000000000000000000000"
+                },
+                ItemType: skin
+            });
+        }
+    }
+
+    if (
+        typeof config.spoofMasteryRank === "number" &&
+        config.spoofMasteryRank >= 0 &&
+        config.spoofMasteryRank <= 5030
+    ) {
+        inventoryResponse.PlayerLevel = config.spoofMasteryRank;
+        inventoryResponse.XPInfo = [];
+        let numFrames = getExpRequiredForMr(config.spoofMasteryRank) / 6000;
+        while (numFrames-- > 0) {
+            inventoryResponse.XPInfo.push({
+                ItemType: "/Lotus/Powersuits/Mag/Mag",
+                XP: 1_600_000
+            });
+        }
+    }
+
     response.json(inventoryResponse);
+};
+
+const getExpRequiredForMr = (rank: number): number => {
+    if (rank <= 30) {
+        return 2500 * rank * rank;
+    }
+    return 2_250_000 + 147_500 * (rank - 30);
 };
 
 export { inventoryController };

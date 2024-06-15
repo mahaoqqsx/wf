@@ -1,0 +1,22 @@
+@media (min-width: 992px) {
+    body.logged-in #main-view {
+        display: flex;
+    }
+
+    body.logged-in #sidebar {
+        position: sticky;
+        top: 5rem;
+        height: 100px;
+        margin-right: 3rem;
+    }
+
+    body:not(.logged-in) #sidebar {
+        display: none;
+    }
+}
+
+body:not(.logged-in) .navbar-toggler,
+body:not(.logged-in) .nav-item.dropdown,
+body:not(.logged-in) #refresh-note {
+    display: none;
+}

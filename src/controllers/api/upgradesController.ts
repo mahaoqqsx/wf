@@ -1,11 +1,12 @@
 import { RequestHandler } from "express";
 import { IUpgradesRequest } from "@/src/types/requestTypes";
-import { IPolarity } from "@/src/types/inventoryTypes/commonInventoryTypes";
+import { FocusSchool } from "@/src/types/inventoryTypes/commonInventoryTypes";
 import { IGenericItemDatabase, IMiscItem, TGenericItemKey } from "@/src/types/inventoryTypes/inventoryTypes";
+import { getAccountIdForRequest } from "@/src/services/loginService";
 import { addMiscItems, getInventory, updateCurrency } from "@/src/services/inventoryService";
 
 export const upgradesController: RequestHandler = async (req, res) => {
-    const accountId = req.query.accountId as string;
+    const accountId = await getAccountIdForRequest(req);
     const payload = JSON.parse(req.body.toString()) as IUpgradesRequest;
     const inventory = await getInventory(accountId);
     const InventoryChanges: any = {};
@@ -14,7 +15,7 @@ export const upgradesController: RequestHandler = async (req, res) => {
             operation.UpgradeRequirement == "/Lotus/Types/Items/MiscItems/ModSlotUnlocker" ||
             operation.UpgradeRequirement == "/Lotus/Types/Items/MiscItems/CustomizationSlotUnlocker"
         ) {
-            updateCurrency(10, true, accountId);
+            await updateCurrency(10, true, accountId);
         } else {
             addMiscItems(inventory, [
                 {
@@ -57,14 +58,13 @@ export const upgradesController: RequestHandler = async (req, res) => {
                 }
                 break;
             case "/Lotus/Types/Items/MiscItems/Forma":
+            case "/Lotus/Types/Items/MiscItems/FormaUmbra":
+            case "/Lotus/Types/Items/MiscItems/FormaAura":
+            case "/Lotus/Types/Items/MiscItems/FormaStance":
                 for (const item of inventory[payload.ItemCategory as TGenericItemKey] as IGenericItemDatabase[]) {
                     if (item._id.toString() == payload.ItemId.$oid) {
                         item.XP = 0;
-                        item.Polarity ??= [];
-                        item.Polarity.push({
-                            Slot: operation.PolarizeSlot,
-                            Value: operation.PolarizeValue
-                        } satisfies IPolarity);
+                        setSlotPolarity(item, operation.PolarizeSlot, operation.PolarizeValue);
                         item.Polarized ??= 0;
                         item.Polarized += 1;
                         break;
@@ -101,10 +101,33 @@ export const upgradesController: RequestHandler = async (req, res) => {
                     }
                 }
                 break;
+            case "":
+                console.assert(operation.OperationType == "UOT_SWAP_POLARITY");
+                for (const item of inventory[payload.ItemCategory as TGenericItemKey] as IGenericItemDatabase[]) {
+                    if (item._id.toString() == payload.ItemId.$oid) {
+                        for (let i = 0; i != operation.PolarityRemap.length; ++i) {
+                            if (operation.PolarityRemap[i].Slot != i) {
+                                setSlotPolarity(item, i, operation.PolarityRemap[i].Value);
+                            }
+                        }
+                        break;
+                    }
+                }
+                break;
             default:
                 throw new Error("Unsupported upgrade: " + operation.UpgradeRequirement);
         }
     }
     await inventory.save();
     res.json({ InventoryChanges });
+};
+
+const setSlotPolarity = (item: IGenericItemDatabase, slot: number, polarity: FocusSchool): void => {
+    item.Polarity ??= [];
+    const entry = item.Polarity.find(entry => entry.Slot == slot);
+    if (entry) {
+        entry.Value = polarity;
+    } else {
+        item.Polarity.push({ Slot: slot, Value: polarity });
+    }
 };

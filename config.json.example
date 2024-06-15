@@ -1,0 +1,24 @@
+{
+  "mongodbUrl": "mongodb://127.0.0.1:27017/openWF",
+  "logger": {
+    "files": true,
+    "level": "trace",
+    "__valid_levels": "fatal, error, warn, info, http, debug, trace"
+  },
+  "myAddress": "localhost",
+  "httpPort": 80,
+  "httpsPort": 443,
+  "autoCreateAccount": true,
+  "skipStoryModeChoice": true,
+  "skipTutorial": true,
+  "unlockAllScans": true,
+  "unlockAllMissions": true,
+  "unlockAllQuests": true,
+  "completeAllQuests": false,
+  "infiniteResources": true,
+  "unlockAllShipFeatures": true,
+  "unlockAllShipDecorations": true,
+  "unlockAllFlavourItems": true,
+  "unlockAllSkins": true,
+  "spoofMasteryRank": -1
+}

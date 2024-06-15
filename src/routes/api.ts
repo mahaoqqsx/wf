@@ -50,6 +50,14 @@ import { createGuildController } from "@/src/controllers/api/createGuildControll
 import { sellController } from "@/src/controllers/api/sellController";
 import { upgradesController } from "@/src/controllers/api/upgradesController";
 import { setSupportedSyndicateController } from "@/src/controllers/api/setSupportedSyndicateController";
+import { getDailyDealStockLevelsController } from "@/src/controllers/api/getDailyDealStockLevelsController";
+import { getGuildLogController } from "../controllers/api/getGuildLogController";
+import { guildTechController } from "../controllers/api/guildTechController";
+import { dojoController } from "@/src/controllers/api/dojoController";
+import { getGuildDojoController } from "@/src/controllers/api/getGuildDojoController";
+import { syndicateSacrificeController } from "../controllers/api/syndicateSacrificeController";
+import { startDojoRecipeController } from "@/src/controllers/api/startDojoRecipeController";
+import { queueDojoComponentDestructionController } from "@/src/controllers/api/queueDojoComponentDestructionController";
 
 const apiRouter = express.Router();
 
@@ -78,6 +86,11 @@ apiRouter.get("/setBootLocation.php", setBootLocationController);
 apiRouter.get("/setActiveShip.php", setActiveShipController);
 apiRouter.get("/getGuild.php", getGuildController);
 apiRouter.get("/setSupportedSyndicate.php", setSupportedSyndicateController);
+apiRouter.get("/getDailyDealStockLevels.php", getDailyDealStockLevelsController);
+apiRouter.get("/getGuildLog.php", getGuildLogController);
+apiRouter.get("/dojo", dojoController);
+apiRouter.get("/getGuildDojo.php", getGuildDojoController);
+apiRouter.get("/queueDojoComponentDestruction.php", queueDojoComponentDestructionController);
 
 // post
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -110,5 +123,8 @@ apiRouter.post("/addFriendImage.php", addFriendImageController);
 apiRouter.post("/createGuild.php", createGuildController);
 apiRouter.post("/sell.php", sellController);
 apiRouter.post("/upgrades.php", upgradesController);
+apiRouter.post("/guildTech.php", guildTechController);
+apiRouter.post("/syndicateSacrifice.php", syndicateSacrificeController);
+apiRouter.post("/startDojoRecipe.php", startDojoRecipeController);
 
 export { apiRouter };

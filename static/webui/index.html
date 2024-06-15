@@ -2,74 +2,277 @@
 <html lang="en" data-bs-theme="dark">
     <head>
         <title>OpenWF WebUI</title>
-        <link
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-            rel="stylesheet"
-            integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-            crossorigin="anonymous"
-        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="libs/bootstrap.min.css" />
+        <link rel="stylesheet" href="style.css" />
     </head>
     <body>
-        <div class="container pt-3 pb-3">
-            <h1>OpenWF WebUI</h1>
-            <div id="login-view">
-                <p>Login using your OpenWF account credentials.</p>
-                <form onsubmit="doLogin();return false;">
-                    <label for="email">Email address</label>
-                    <input class="form-control" type="email" id="email" required />
-                    <br />
-                    <label for="password">Password</label>
-                    <input class="form-control" type="password" id="password" required />
-                    <br />
-                    <button class="btn btn-primary" type="submit">Login</button>
-                </form>
+        <nav class="navbar sticky-top bg-body-tertiary">
+            <div class="container">
+                <button
+                    class="navbar-toggler d-lg-none"
+                    type="button"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#sidebar"
+                    aria-controls="sidebar"
+                    aria-label="Toggle sidebar"
+                >
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <a class="navbar-brand">OpenWF WebUI</a>
+                <div class="nav-item dropdown">
+                    <button
+                        class="nav-link dropdown-toggle displayname"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                    ></button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/webui/" onclick="logout();">Logout</a></li>
+                    </ul>
+                </div>
             </div>
-            <div id="main-view" class="d-none">
-                <p>Hello, <b class="displayname"></b>! <a href="#" onclick="logout();">Logout</a></p>
-                <p>
-                    Note: Changes made here will only be reflected in-game when the game re-downloads your inventory.
-                    Visiting the navigation should be the easiest way to trigger that.
-                </p>
-                <div class="row">
-                    <div class="col-lg-6">
-                        <div class="card mb-3">
-                            <h5 class="card-header">Warframes</h5>
-                            <div class="card-body">
-                                <table class="table table-striped w-100">
-                                    <tbody id="warframe-list"></tbody>
-                                </table>
-                                <form class="input-group" onsubmit="doAcquireWarframe();return false;">
-                                    <button class="btn btn-primary" type="submit">Add</button>
-                                    <input class="form-control" id="warframe-to-acquire" list="datalist-warframes" />
-                                </form>
+        </nav>
+        <div class="container pt-3 pb-3" id="main-view">
+            <div class="offcanvas-lg offcanvas-start" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="sidebarLabel">Sidebar</h5>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="offcanvas"
+                        data-bs-target="#sidebar"
+                        aria-label="Close"
+                    ></button>
+                </div>
+                <div class="offcanvas-body">
+                    <div class="navbar p-0">
+                        <ul class="navbar-nav justify-content-end">
+                            <li class="nav-item">
+                                <a
+                                    class="nav-link"
+                                    href="/webui/inventory"
+                                    data-bs-dismiss="offcanvas"
+                                    data-bs-target="#sidebar"
+                                >
+                                    Inventory
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a
+                                    class="nav-link"
+                                    href="/webui/mods"
+                                    data-bs-dismiss="offcanvas"
+                                    data-bs-target="#sidebar"
+                                >
+                                    Mods
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a
+                                    class="nav-link"
+                                    href="/webui/settings"
+                                    data-bs-dismiss="offcanvas"
+                                    data-bs-target="#sidebar"
+                                >
+                                    Settings
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div data-route="/webui/" data-title="Login | OpenWF WebUI">
+                    <p>Login using your OpenWF account credentials.</p>
+                    <form onsubmit="doLogin();return false;">
+                        <label for="email">Email address</label>
+                        <input class="form-control" type="email" id="email" required />
+                        <br />
+                        <label for="password">Password</label>
+                        <input class="form-control" type="password" id="password" required />
+                        <br />
+                        <button class="btn btn-primary" type="submit">Login</button>
+                    </form>
+                </div>
+                <div data-route="/webui/inventory" data-title="Inventory | OpenWF WebUI">
+                    <p id="refresh-note" class="mb-4">
+                        Note: Changes made here will only be reflected in-game when the game re-downloads your
+                        inventory. Visiting the navigation should be the easiest way to trigger that.
+                    </p>
+                    <div class="card mb-4">
+                        <h5 class="card-header">Add Items</h5>
+                        <form class="card-body input-group" onsubmit="doAcquireMiscItems();return false;">
+                            <input class="form-control" id="miscitem-count" type="number" min="1" value="1" />
+                            <input class="form-control" id="miscitem-type" list="datalist-miscitems" />
+                            <button class="btn btn-primary" type="submit">Add</button>
+                        </form>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="card mb-4">
+                                <h5 class="card-header">Warframes</h5>
+                                <div class="card-body">
+                                    <table class="table table-hover w-100">
+                                        <tbody id="warframe-list"></tbody>
+                                    </table>
+                                    <form class="input-group" onsubmit="doAcquireWarframe();return false;">
+                                        <input
+                                            class="form-control"
+                                            id="warframe-to-acquire"
+                                            list="datalist-warframes"
+                                        />
+                                        <button class="btn btn-primary" type="submit">Add</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card mb-4">
+                                <h5 class="card-header">Weapons</h5>
+                                <div class="card-body">
+                                    <table class="table table-hover w-100">
+                                        <tbody id="weapon-list"></tbody>
+                                    </table>
+                                    <form class="input-group" onsubmit="doAcquireWeapon();return false;">
+                                        <input class="form-control" id="weapon-to-acquire" list="datalist-weapons" />
+                                        <button class="btn btn-primary" type="submit">Add</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-6">
-                        <div class="card mb-3">
-                            <h5 class="card-header">Weapons</h5>
-                            <div class="card-body">
-                                <table class="table table-striped w-100">
-                                    <tbody id="weapon-list"></tbody>
-                                </table>
-                                <form class="input-group" onsubmit="doAcquireWeapon();return false;">
-                                    <button class="btn btn-primary" type="submit">Add</button>
-                                    <input class="form-control" id="weapon-to-acquire" list="datalist-weapons" />
+                </div>
+                <div data-route="/webui/mods" data-title="Mods | OpenWF WebUI">
+                    <p id="refresh-note" class="mb-4">
+                        Note: Changes made here will only be reflected in-game when the game re-downloads your
+                        inventory. Visiting the navigation should be the easiest way to trigger that.
+                    </p>
+                    <div class="row">
+                        <div class="col-xxl-6">
+                            <div class="card mb-4">
+                                <h5 class="card-header">Add Riven</h5>
+                                <form class="card-body" onsubmit="doAcquireRiven();return false;">
+                                    <select class="form-control mb-3" id="addriven-type">
+                                        <option value="LotusArchgunRandomModRare">LotusArchgunRandomModRare</option>
+                                        <option value="LotusModularMeleeRandomModRare">
+                                            LotusModularMeleeRandomModRare
+                                        </option>
+                                        <option value="LotusModularPistolRandomModRare">
+                                            LotusModularPistolRandomModRare
+                                        </option>
+                                        <option value="LotusPistolRandomModRare">LotusPistolRandomModRare</option>
+                                        <option value="LotusRifleRandomModRare" selected>
+                                            LotusRifleRandomModRare
+                                        </option>
+                                        <option value="LotusShotgunRandomModRare">LotusShotgunRandomModRare</option>
+                                        <option value="PlayerMeleeWeaponRandomModRare">
+                                            PlayerMeleeWeaponRandomModRare
+                                        </option>
+                                    </select>
+                                    <textarea
+                                        id="addriven-fingerprint"
+                                        class="form-control mb-3"
+                                        placeholder="Fingerprint"
+                                    ></textarea>
+                                    <button class="btn btn-primary" style="margin-right: 5px" type="submit">Add</button>
+                                    <a href="riven-tool/" target="_blank">Need help with the fingerprint?</a>
                                 </form>
+                            </div>
+                            <div class="card mb-4">
+                                <h5 class="card-header">Rivens</h5>
+                                <div class="card-body">
+                                    <table class="table table-hover w-100">
+                                        <tbody id="riven-list"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xxl-6">
+                            <div class="card mb-4">
+                                <h5 class="card-header">Mods</h5>
+                                <div class="card-body">
+                                    <table class="table table-hover w-100">
+                                        <tbody id="mods-list"></tbody>
+                                    </table>
+                                    <form class="input-group" onsubmit="doAcquireMod();return false;">
+                                        <input class="form-control" id="mod-to-acquire" list="datalist-mods" />
+                                        <button class="btn btn-primary" type="submit">Add</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
+                </div>
+                <div data-route="/webui/settings" data-title="Settings | OpenWF WebUI">
+                    <form onsubmit="doChangeSettings();return false;">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="skipStoryModeChoice" />
+                            <label class="form-check-label" for="skipStoryModeChoice">Skip Story Mode Choice</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="skipTutorial" />
+                            <label class="form-check-label" for="skipTutorial">Skip Tutorial</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="unlockAllScans" />
+                            <label class="form-check-label" for="unlockAllScans">Unlock All Scans</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="unlockAllMissions" />
+                            <label class="form-check-label" for="unlockAllMissions">Unlock All Missions</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="unlockAllQuests" />
+                            <label class="form-check-label" for="unlockAllQuests">Unlock All Quests</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="completeAllQuests" />
+                            <label class="form-check-label" for="completeAllQuests">Complete All Quests</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="infiniteResources" />
+                            <label class="form-check-label" for="infiniteResources"
+                                >Infinite Credits and Platinum</label
+                            >
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="unlockAllShipFeatures" />
+                            <label class="form-check-label" for="unlockAllShipFeatures">Unlock All Ship Features</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="unlockAllShipDecorations" />
+                            <label class="form-check-label" for="unlockAllShipDecorations"
+                                >Unlock All Ship Decorations</label
+                            >
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="unlockAllFlavourItems" />
+                            <label class="form-check-label" for="unlockAllFlavourItems">Unlock All Accessories</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="unlockAllSkins" />
+                            <label class="form-check-label" for="unlockAllSkins">Unlock All Skins</label>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="spoofMasteryRank"
+                                >Spoofed Mastery Rank (-1 to disable)</label
+                            >
+                            <input class="form-control" id="spoofMasteryRank" type="number" min="-1" />
+                        </div>
+                        <button class="btn btn-primary mt-3" type="submit">Save Settings</button>
+                    </form>
                 </div>
             </div>
         </div>
         <datalist id="datalist-warframes"></datalist>
         <datalist id="datalist-weapons"></datalist>
-        <script
-            src="https://code.jquery.com/jquery-3.6.0.min.js"
-            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
-            crossorigin="anonymous"
-        ></script>
-        <script src="https://cdn.jsdelivr.net/gh/angeal185/whirlpool-js/dist/whirlpool-js.min.js"></script>
+        <datalist id="datalist-miscitems"></datalist>
+        <datalist id="datalist-mods"></datalist>
+        <script src="libs/jquery-3.6.0.min.js"></script>
+        <script src="libs/whirlpool-js.min.js"></script>
+        <script src="libs/single.js"></script>
+        <script src="riven-tool/RivenParser.js"></script>
         <script src="script.js"></script>
+        <script src="libs/bootstrap.bundle.min.js"></script>
     </body>
 </html>

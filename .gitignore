@@ -2,7 +2,9 @@
 /build
 
 /.env
-/static/data/*.bin
+/config.json
+/static/data/**
+!/static/data/.gitkeep
 yarn.lock
 /tmp
 

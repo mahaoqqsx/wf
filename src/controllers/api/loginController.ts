@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { RequestHandler } from "express";
 
-import config from "@/config.json";
+import { config } from "@/src/services/configService";
+import buildConfig from "@/static/data/buildConfig.json";
 
 import { toLoginRequest } from "@/src/helpers/loginHelpers";
 import { Account } from "@/src/models/loginModel";
 import { createAccount, isCorrectPassword } from "@/src/services/loginService";
 import { ILoginResponse } from "@/src/types/loginTypes";
-import { DTLS, groups, HUB, IRC, Nonce, NRS, platformCDNs } from "@/static/fixed_responses/login_static";
+import { DTLS, groups, HUB, platformCDNs } from "@/static/fixed_responses/login_static";
 import { logger } from "@/src/utils/logger";
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -17,6 +18,7 @@ const loginController: RequestHandler = async (request, response) => {
     const loginRequest = toLoginRequest(body);
 
     const account = await Account.findOne({ email: loginRequest.email }); //{ _id: 0, __v: 0 }
+    const nonce = Math.round(Math.random() * Number.MAX_SAFE_INTEGER);
 
     if (!account && config.autoCreateAccount && loginRequest.ClientType != "webui") {
         try {
@@ -29,7 +31,8 @@ const loginController: RequestHandler = async (request, response) => {
                 CrossPlatformAllowed: true,
                 ForceLogoutVersion: 0,
                 ConsentNeeded: false,
-                TrackedSettings: []
+                TrackedSettings: [],
+                Nonce: nonce
             });
             logger.debug("created new account");
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -38,13 +41,12 @@ const loginController: RequestHandler = async (request, response) => {
                 ...databaseAccount,
                 Groups: groups,
                 platformCDNs: platformCDNs,
-                Nonce: Nonce,
-                NRS: NRS,
+                NRS: [config.myAddress],
                 DTLS: DTLS,
-                IRC: IRC,
+                IRC: [config.myAddress],
                 HUB: HUB,
-                BuildLabel: config.buildLabel,
-                MatchmakingBuildId: config.matchmakingBuildId
+                BuildLabel: buildConfig.buildLabel,
+                MatchmakingBuildId: buildConfig.matchmakingBuildId
             };
 
             response.json(newLoginResponse);
@@ -62,18 +64,25 @@ const loginController: RequestHandler = async (request, response) => {
         return;
     }
 
+    if (account.Nonce == 0 || loginRequest.ClientType != "webui") {
+        account.Nonce = nonce;
+    }
+    if (loginRequest.ClientType != "webui") {
+        account.CountryCode = loginRequest.lang.toUpperCase();
+    }
+    await account.save();
+
     const { email, password, ...databaseAccount } = account.toJSON();
     const newLoginResponse: ILoginResponse = {
         ...databaseAccount,
         Groups: groups,
         platformCDNs: platformCDNs,
-        Nonce: Nonce,
-        NRS: NRS,
+        NRS: [config.myAddress],
         DTLS: DTLS,
-        IRC: IRC,
+        IRC: [config.myAddress],
         HUB: HUB,
-        BuildLabel: config.buildLabel,
-        MatchmakingBuildId: config.matchmakingBuildId
+        BuildLabel: buildConfig.buildLabel,
+        MatchmakingBuildId: buildConfig.matchmakingBuildId
     };
 
     response.json(newLoginResponse);
