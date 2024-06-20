@@ -171,7 +171,7 @@ export interface IInventoryResponse {
     SpectreLoadouts: ISpectreLoadout[];
     SentinelWeapons: IEquipmentDatabase[];
     Sentinels: IEquipmentDatabase[];
-    EmailItems: ITypeXPItem[];
+    EmailItems: ITypeCount[];
     CompletedSyndicates: string[];
     FocusXP: IFocusXP;
     Wishlist: string[];
@@ -233,21 +233,21 @@ export interface IInventoryResponse {
     DailyAffiliationEntrati: number;
     DailyAffiliationNecraloid: number;
     MechSuits: IEquipmentDatabase[];
-    InfestedFoundry: IInfestedFoundry;
+    InfestedFoundry?: IInfestedFoundry;
     BlessingCooldown: IMongoDate;
     CrewShipHarnesses: IEquipmentDatabase[];
     CrewShipRawSalvage: IConsumable[];
     CrewMembers: ICrewMember[];
     AdultOperatorLoadOuts: IOperatorConfigClient[];
     LotusCustomization: ILotusCustomization;
-    UseAdultOperatorLoadout: boolean;
+    UseAdultOperatorLoadout?: boolean;
     DailyAffiliationZariman: number;
     NemesisAbandonedRewards: string[];
     DailyAffiliationKahl: number;
     LastInventorySync: IOid;
     NextRefill: IMongoDate;
     ActiveLandscapeTraps: any[];
-    EvolutionProgress: any[];
+    EvolutionProgress?: IEvolutionProgress[];
     RepVotes: any[];
     LeagueTickets: any[];
     Quests: any[];
@@ -359,6 +359,7 @@ export interface ICombat {
 export enum InventorySlot {
     SUITS = "SuitBin",
     WEAPONS = "WeaponBin",
+    SPACESUITS = "SpaceSuitBin",
     MECHSUITS = "MechBin",
     PVE_LOADOUTS = "PveBonusLoadoutBin",
     SENTINELS = "SentinelBin"
@@ -483,14 +484,14 @@ export interface IFusionTreasure {
 }
 
 export interface IInfestedFoundry {
-    Name: string;
-    Resources: ITypeCount[];
-    Slots: number;
-    XP: number;
-    ConsumedSuits: IConsumedSuit[];
-    InvigorationIndex: number;
-    InvigorationSuitOfferings: string[];
-    InvigorationsApplied: number;
+    Name?: string;
+    Resources?: ITypeCount[];
+    Slots?: number;
+    XP?: number;
+    ConsumedSuits?: IConsumedSuit[];
+    InvigorationIndex?: number;
+    InvigorationSuitOfferings?: string[];
+    InvigorationsApplied?: number;
 }
 
 export interface IConsumedSuit {
@@ -832,7 +833,7 @@ export interface IStepSequencer {
     NotePacks: INotePacks;
     FingerPrint: string;
     Name: string;
-    ItemId: IOid;
+    ItemId?: IOid;
 }
 
 export interface INotePacks {
@@ -866,4 +867,10 @@ export interface IWebFlags {
     Tennocon2020Digital: boolean;
     Anniversary2021: boolean;
     HitDownloadBtn: IMongoDate;
+}
+
+export interface IEvolutionProgress {
+    Progress: number;
+    Rank: number;
+    ItemType: string;
 }

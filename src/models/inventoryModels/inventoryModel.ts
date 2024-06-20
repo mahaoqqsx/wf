@@ -35,7 +35,8 @@ import {
     ITauntHistory,
     IPeriodicMissionCompletionDatabase,
     IPeriodicMissionCompletionResponse,
-    ILoreFragmentScan
+    ILoreFragmentScan,
+    IEvolutionProgress
 } from "../../types/inventoryTypes/inventoryTypes";
 import { IOid } from "../../types/commonTypes";
 import {
@@ -45,7 +46,8 @@ import {
     IOperatorConfigDatabase,
     IPolarity,
     IEquipmentDatabase,
-    IOperatorConfigClient
+    IOperatorConfigClient,
+    IArchonCrystalUpgrade
 } from "@/src/types/inventoryTypes/commonInventoryTypes";
 import { toMongoDate, toOid } from "@/src/helpers/inventoryHelpers";
 
@@ -160,14 +162,17 @@ const ItemConfigSchema = new Schema<IItemConfig>(
         facial: colorSchema,
         syancol: colorSchema,
         Upgrades: [String],
-        Songs: [
-            {
-                m: String,
-                b: String,
-                p: String,
-                s: String
-            }
-        ],
+        Songs: {
+            type: [
+                {
+                    m: String,
+                    b: String,
+                    p: String,
+                    s: String
+                }
+            ],
+            default: undefined
+        },
         Name: String,
         AbilityOverride: abilityOverrideSchema,
         PvpUpgrades: [String],
@@ -182,29 +187,46 @@ ItemConfigSchema.set("toJSON", {
     }
 });
 
-const EquipmentSchema = new Schema<IEquipmentDatabase>({
-    ItemType: String,
-    Configs: [ItemConfigSchema],
-    UpgradeVer: Number,
-    XP: Number,
-    Features: Number,
-    Polarized: Number,
-    Polarity: [polaritySchema],
-    FocusLens: String,
-    ModSlotPurchases: Number,
-    CustomizationSlotPurchases: Number,
-    UpgradeType: Schema.Types.Mixed, //todo
-    UpgradeFingerprint: String,
-    ItemName: String,
-    InfestationDate: Date,
-    InfestationDays: Number,
-    InfestationType: String,
-    ModularParts: [String],
-    UnlockLevel: Number,
-    Expiry: Date,
-    SkillTree: String,
-    ArchonCrystalUpgrades: [Schema.Types.Mixed] //TODO
+const ArchonCrystalUpgradeSchema = new Schema<IArchonCrystalUpgrade>(
+    {
+        UpgradeType: String,
+        Color: String
+    },
+    { _id: false }
+);
+
+ArchonCrystalUpgradeSchema.set("toJSON", {
+    transform(_document, returnedObject) {
+        delete returnedObject.__v;
+    }
 });
+
+const EquipmentSchema = new Schema<IEquipmentDatabase>(
+    {
+        ItemType: String,
+        Configs: [ItemConfigSchema],
+        UpgradeVer: Number,
+        XP: Number,
+        Features: Number,
+        Polarized: Number,
+        Polarity: [polaritySchema],
+        FocusLens: String,
+        ModSlotPurchases: Number,
+        CustomizationSlotPurchases: Number,
+        UpgradeType: String,
+        UpgradeFingerprint: String,
+        ItemName: String,
+        InfestationDate: Date,
+        InfestationDays: Number,
+        InfestationType: String,
+        ModularParts: { type: [String], default: undefined },
+        UnlockLevel: Number,
+        Expiry: Date,
+        SkillTree: String,
+        ArchonCrystalUpgrades: { type: [ArchonCrystalUpgradeSchema], default: undefined }
+    },
+    { id: false }
+);
 
 EquipmentSchema.virtual("ItemId").get(function () {
     return { $oid: this._id.toString() } satisfies IOid;
@@ -432,16 +454,19 @@ const consumedSchuitsSchema = new Schema<IConsumedSuit>({
     c: colorSchema
 });
 
-const infestedFoundrySchema = new Schema<IInfestedFoundry>({
-    Name: String,
-    Resources: [typeCountSchema],
-    Slots: Number,
-    XP: Number,
-    ConsumedSuits: [consumedSchuitsSchema],
-    InvigorationIndex: Number,
-    InvigorationSuitOfferings: [String],
-    InvigorationsApplied: Number
-});
+const infestedFoundrySchema = new Schema<IInfestedFoundry>(
+    {
+        Name: String,
+        Resources: { type: [typeCountSchema], default: undefined },
+        Slots: Number,
+        XP: Number,
+        ConsumedSuits: { type: [consumedSchuitsSchema], default: undefined },
+        InvigorationIndex: Number,
+        InvigorationSuitOfferings: { type: [String], default: undefined },
+        InvigorationsApplied: Number
+    },
+    { _id: false }
+);
 
 const questProgressSchema = new Schema<IQuestProgress>(
     {
@@ -536,6 +561,15 @@ const loreFragmentScansSchema = new Schema<ILoreFragmentScan>(
     {
         Progress: Number,
         Region: String,
+        ItemType: String
+    },
+    { _id: false }
+);
+
+const evolutionProgressSchema = new Schema<IEvolutionProgress>(
+    {
+        Progress: Number,
+        Rank: Number,
         ItemType: String
     },
     { _id: false }
@@ -861,7 +895,7 @@ const inventorySchema = new Schema<IInventoryDatabase, InventoryDocumentProps>(
 
         //Progress+Rank+ItemType(ZarimanPumpShotgun)
         //https://warframe.fandom.com/wiki/Incarnon
-        EvolutionProgress: [Schema.Types.Mixed],
+        EvolutionProgress: { type: [evolutionProgressSchema], default: undefined },
 
         //Unknown and system
         DuviriInfo: DuviriInfoSchema,
@@ -871,7 +905,7 @@ const inventorySchema = new Schema<IInventoryDatabase, InventoryDocumentProps>(
         ChallengesFixVersion: Number,
         PlayedParkourTutorial: Boolean,
         SubscribedToEmailsPersonalized: Number,
-        LastInventorySync: Schema.Types.Mixed,
+        LastInventorySync: Schema.Types.Mixed, // this should be Schema.Types.ObjectId, but older inventories may break with that.
         ActiveLandscapeTraps: [Schema.Types.Mixed],
         RepVotes: [Schema.Types.Mixed],
         LeagueTickets: [Schema.Types.Mixed],
@@ -897,7 +931,7 @@ const inventorySchema = new Schema<IInventoryDatabase, InventoryDocumentProps>(
         //Grustag three
         DeathSquadable: Boolean
     },
-    { timestamps: { createdAt: "Created", updatedAt: "LastInventorySync" } }
+    { timestamps: { createdAt: "Created" } }
 );
 
 inventorySchema.set("toJSON", {
@@ -925,6 +959,7 @@ type InventoryDocumentProps = {
     LongGuns: Types.DocumentArray<IEquipmentDatabase>;
     Pistols: Types.DocumentArray<IEquipmentDatabase>;
     Melee: Types.DocumentArray<IEquipmentDatabase>;
+    OperatorAmps: Types.DocumentArray<IEquipmentDatabase>;
     FlavourItems: Types.DocumentArray<IFlavourItem>;
     RawUpgrades: Types.DocumentArray<IRawUpgrade>;
     Upgrades: Types.DocumentArray<ICrewShipSalvagedWeaponSkin>;
@@ -940,6 +975,10 @@ type InventoryDocumentProps = {
     Sentinels: Types.DocumentArray<IEquipmentDatabase>;
     Horses: Types.DocumentArray<IEquipmentDatabase>;
     PendingRecipes: Types.DocumentArray<IPendingRecipeDatabase>;
+    SpaceSuits: Types.DocumentArray<IEquipmentDatabase>;
+    SpaceGuns: Types.DocumentArray<IEquipmentDatabase>;
+    SpaceMelee: Types.DocumentArray<IEquipmentDatabase>;
+    SentinelWeapons: Types.DocumentArray<IEquipmentDatabase>;
 };
 
 // eslint-disable-next-line @typescript-eslint/ban-types

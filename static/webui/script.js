@@ -96,6 +96,10 @@ window.itemListPromise = new Promise(resolve => {
             "/Lotus/Weapons/Tenno/Rifle/LotusRifle": { name: "Rifle" },
             "/Lotus/Weapons/Tenno/Shotgun/LotusShotgun": { name: "Shotgun" },
             // Modular weapons
+            "/Lotus/Weapons/SolarisUnited/Primary/LotusModularPrimaryBeam": { name: "Kitgun" },
+            "/Lotus/Weapons/SolarisUnited/Secondary/LotusModularSecondary": { name: "Kitgun" },
+            "/Lotus/Weapons/SolarisUnited/Secondary/LotusModularSecondaryBeam": { name: "Kitgun" },
+            "/Lotus/Weapons/SolarisUnited/Secondary/LotusModularSecondaryShotgun": { name: "Kitgun" },
             "/Lotus/Weapons/Ostron/Melee/LotusModularWeapon": { name: "Zaw" },
             // Missing in data sources
             "/Lotus/Upgrades/CosmeticEnhancers/Peculiars/CyoteMod": { name: "Traumatic Peculiar" }
@@ -105,10 +109,7 @@ window.itemListPromise = new Promise(resolve => {
                 items.forEach(item => {
                     if (item.uniqueName in data.badItems) {
                         item.name += " (Imposter)";
-                    } else if (
-                        item.uniqueName.substr(0, 18) != "/Lotus/Types/Game/" &&
-                        item.uniqueName.substr(0, 18) != "/Lotus/StoreItems/"
-                    ) {
+                    } else if (item.uniqueName.substr(0, 18) != "/Lotus/Types/Game/") {
                         const option = document.createElement("option");
                         option.setAttribute("data-key", item.uniqueName);
                         option.value = item.name;
@@ -524,7 +525,7 @@ function doAcquireMiscItems() {
                 MiscItems: [
                     {
                         ItemType: uniqueName,
-                        ItemCount: $("#miscitem-count").val()
+                        ItemCount: parseInt($("#miscitem-count").val())
                     }
                 ]
             })
