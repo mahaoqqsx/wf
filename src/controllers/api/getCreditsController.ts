@@ -22,8 +22,18 @@ export const getCreditsController: RequestHandler = async (req, res) => {
         });
         return;
     }
-
-    const inventory = await getInventory(accountId);
+	
+	const inventory = await getInventory(accountId);
+	if (config.infinitePlatinum) {
+        res.json({
+            RegularCredits: inventory.RegularCredits,
+			TradesRemaining: inventory.TradesRemaining,
+            PremiumCreditsFree: 999999999,
+            PremiumCredits: 999999999
+        });
+        return;
+    }
+	
     res.json({
         RegularCredits: inventory.RegularCredits,
         TradesRemaining: inventory.TradesRemaining,
