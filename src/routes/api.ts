@@ -22,6 +22,7 @@ import { getIgnoredUsersController } from "@/src/controllers/api/getIgnoredUsers
 import { getNewRewardSeedController } from "@/src/controllers/api/getNewRewardSeedController";
 import { getShipController } from "@/src/controllers/api/getShipController";
 import { getVendorInfoController } from "@/src/controllers/api/getVendorInfoController";
+import { giveKeyChainTriggeredItemsController } from "@/src/controllers/api/giveKeyChainTriggeredItemsController";
 import { guildTechController } from "../controllers/api/guildTechController";
 import { hostSessionController } from "@/src/controllers/api/hostSessionController";
 import { hubController } from "@/src/controllers/api/hubController";
@@ -57,7 +58,9 @@ import { stepSequencersController } from "@/src/controllers/api/stepSequencersCo
 import { surveysController } from "@/src/controllers/api/surveysController";
 import { syndicateSacrificeController } from "../controllers/api/syndicateSacrificeController";
 import { trainingResultController } from "@/src/controllers/api/trainingResultController";
+import { unlockShipFeatureController } from "@/src/controllers/api/unlockShipFeatureController";
 import { updateChallengeProgressController } from "@/src/controllers/api/updateChallengeProgressController";
+import { updateQuestcontroller } from "@/src/controllers/api/updateQuestController";
 import { updateSessionGetController, updateSessionPostController } from "@/src/controllers/api/updateSessionController";
 import { updateThemeController } from "../controllers/api/updateThemeController";
 import { upgradesController } from "@/src/controllers/api/upgradesController";
@@ -97,6 +100,7 @@ apiRouter.get("/surveys.php", surveysController);
 apiRouter.get("/updateSession.php", updateSessionGetController);
 
 // post
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
 apiRouter.post("/addFriendImage.php", addFriendImageController);
 apiRouter.post("/artifacts.php", artifactsController);
 apiRouter.post("/claimCompletedRecipe.php", claimCompletedRecipeController);
@@ -106,6 +110,7 @@ apiRouter.post("/findSessions.php", findSessionsController);
 apiRouter.post("/focus.php", focusController);
 apiRouter.post("/genericUpdate.php", genericUpdateController);
 apiRouter.post("/getAlliance.php", getAllianceController);
+apiRouter.post("/giveKeyChainTriggeredItems.php", giveKeyChainTriggeredItemsController);
 apiRouter.post("/guildTech.php", guildTechController);
 apiRouter.post("/hostSession.php", hostSessionController);
 apiRouter.post("/infestedFoundry.php", infestedFoundryController);
@@ -127,7 +132,9 @@ apiRouter.post("/startRecipe.php", startRecipeController);
 apiRouter.post("/stepSequencers.php", stepSequencersController);
 apiRouter.post("/syndicateSacrifice.php", syndicateSacrificeController);
 apiRouter.post("/trainingResult.php", trainingResultController);
+apiRouter.post("/unlockShipFeature.php", unlockShipFeatureController);
 apiRouter.post("/updateChallengeProgress.php", updateChallengeProgressController);
+apiRouter.post("/updateQuest.php", updateQuestcontroller);
 apiRouter.post("/updateSession.php", updateSessionPostController);
 apiRouter.post("/updateTheme.php", updateThemeController);
 apiRouter.post("/upgrades.php", upgradesController);
