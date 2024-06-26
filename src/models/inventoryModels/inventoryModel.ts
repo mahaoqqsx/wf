@@ -932,7 +932,9 @@ const inventorySchema = new Schema<IInventoryDatabase, InventoryDocumentProps>(
         //Zanuka
         Harvestable: Boolean,
         //Grustag three
-        DeathSquadable: Boolean
+        DeathSquadable: Boolean,
+        //ActiveQuest
+        ActiveQuest: String
     },
     { timestamps: { createdAt: "Created" } }
 );
